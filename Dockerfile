@@ -1,37 +1,45 @@
-# Gunakan PHP dengan Apache agar bisa serve Laravel langsung
+# Dockerfile for Laravel (single container, Apache)
 FROM php:8.3-apache
 
-# Install ekstensi yang dibutuhkan
+# --- 1) System deps & PHP extensions ---
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libxml2-dev libicu-dev nodejs npm \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl
+    git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev libicu-dev \
+    nodejs npm gnupg2 ca-certificates \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# --- 2) Working dir ---
 WORKDIR /var/www/html
 
-# Copy composer.json & install dependencies
-COPY composer.json composer.lock ./
-RUN curl -sS https://getcomposer.org/installer | php \
-    && php composer.phar install --no-dev --optimize-autoloader --no-interaction
-
-# Copy semua file project
+# --- 3) Copy all sources first (so artisan exists) ---
 COPY . .
 
-# Build frontend assets
-RUN npm install && npm run build
+# --- 4) Composer: install composer binary, allow superuser (build runs as root) ---
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
-# Set permission
-RUN chmod -R 775 storage bootstrap/cache
+# --- 5) Composer install but avoid running scripts that require artisan before all files are ready ---
+# Use --no-scripts to skip post-autoload scripts that might call artisan early
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Enable mod_rewrite untuk Laravel routing
+# Now run package discover / scripts now that artisan exists
+RUN composer run-script post-autoload-dump || true
+
+# --- 6) Build frontend (Vite) ---
+# use npm ci for reproducible installs; if your repo uses pnpm/yarn, adapt
+RUN npm ci --silent || npm install --silent
+RUN npm run build --silent
+
+# --- 7) Permissions (ensure Apache user can write storage & cache) ---
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# --- 8) Apache config: set DocumentRoot to public ---
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN a2enmod rewrite
-RUN echo '<Directory /var/www/html>\n\
-    AllowOverride All\n\
-    </Directory>' > /etc/apache2/conf-available/laravel.conf && \
-    a2enconf laravel
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf
 
-# Expose port 80
+# --- 9) Expose & Cmd ---
 EXPOSE 80
-
 CMD ["apache2-foreground"]
