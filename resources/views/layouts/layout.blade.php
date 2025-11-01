@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desa Perapakan</title>
+    <title>Desa Capkala</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="icon" type="image/png" href="{{ asset('/image/Sambas Logo compress 300x300.png') }}">
     <link
@@ -29,8 +29,8 @@
                     <img src="{{ asset('image/Sambas Logo.png') }}" width="40" class="me-3"
                         alt="Logo of Desa Parapakan">
                     <span class="logo-text d-flex flex-column">
-                        <strong>Desa Perapakan</strong>
-                        <small>Kecamatan Pemangkat</small>
+                        <strong>Desa Capkala</strong>
+                        <small>Kecamatan Capkala</small>
                     </span>
                 </a>
 
@@ -115,7 +115,7 @@
                 <div class="col-md-4 mb-4">
                     <h5 class="text-uppercase">Tentang Desa</h5>
                     <p>
-                        Perapakan adalah salah satu desa yang berada Kecamatan Pemangkat, Kabupaten Sambas.
+                        Capkala adalah salah satu desa yang berada Kecamatan Capkala, Kabupaten Bengkayang.
                     </p>
                 </div>
                 <!-- Quick Links Section -->

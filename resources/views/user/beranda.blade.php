@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="text-center">
                     <h2 class="text-banner-h2">Selamat Datang di</h2>
-                    <h2 class="text-banner-h1">Website Desa Perapakan</h2>
+                    <h2 class="text-banner-h1">Website Desa Capkala</h2>
                 </div>
             </div>
         </div>
@@ -17,7 +17,7 @@
     <!-- Content Section -->
     <section id="content" class="py-5">
         <div class="container-fluid transition-container col-lg-10 shadow-sm p-4 rounded">
-            <h2 class="subjudul mb-4 text-center fw-bold">Tentang Desa Perapakan</h2>
+            <h2 class="subjudul mb-4 text-center fw-bold">Tentang Desa Capkala</h2>
             <div class="row align-items-center">
                 <!-- Image Content -->
                 <div class="col-lg-6">

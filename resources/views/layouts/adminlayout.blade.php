@@ -80,7 +80,7 @@
             <!-- Content fo Sidebar -->
             <div class="h100">
                 <div class="sidebar-logo collapsed-icon">
-                    <a href="#">Desa Perapakan</a>
+                    <a href="#">Desa Capkala</a>
                 </div>
                 <ul class="sidebar-nav">
                     <li class="sidebar-item">
