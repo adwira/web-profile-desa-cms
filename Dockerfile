@@ -20,14 +20,10 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
 # --- 5) Composer install but avoid running scripts that require artisan before all files are ready ---
-# Use --no-scripts to skip post-autoload scripts that might call artisan early
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Now run package discover / scripts now that artisan exists
 RUN composer run-script post-autoload-dump || true
 
 # --- 6) Build frontend (Vite) ---
-# use npm ci for reproducible installs; if your repo uses pnpm/yarn, adapt
 RUN npm ci --silent || npm install --silent
 RUN npm run build --silent
 
@@ -40,6 +36,13 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN a2enmod rewrite
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf
 
-# --- 9) Expose & Cmd ---
-EXPOSE 80
-CMD ["apache2-foreground"]
+# --- 9) Laravel commands on container start ---
+# Jalankan semua perintah artisan langsung sebelum Apache dijalankan
+CMD chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
+    php artisan key:generate --no-interaction && \
+    php artisan migrate --force && \
+    php artisan db:seed --force && \
+    php artisan storage:link && \
+    php artisan config:cache && \
+    apache2-foreground
